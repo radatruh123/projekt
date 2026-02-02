@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Invaders - High Score</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #33ff00; /* Neonová zelená */
+            --secondary-color: #ff0055; /* Červená pro nepřátele */
+            --text-color: #fff;
+            --bg-color: #111;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            font-family: 'Press Start 2P', cursive;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            /* Efekt staré obrazovky */
+            background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+        }
+
+        h1 {
+            text-transform: uppercase;
+            text-shadow: 3px 3px 0px #fff; /* Větší stín pro retro efekt */
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+        }
+
+        /* Styl pro český popis hry */
+        .game-description {
+            max-width: 800px;
+            text-align: center;
+            color: #ddd;
+            font-size: 0.8rem;
+            line-height: 1.8;
+            margin-bottom: 40px;
+            padding: 20px;
+            border-top: 2px dashed #333;
+            border-bottom: 2px dashed #333;
+        }
+
+        /* Styl tabulky */
+        .score-board {
+            width: 100%;
+            max-width: 700px;
+            border: 4px solid #fff; /* Tlustší rámeček */
+            padding: 30px;
+            background-color: #000;
+            box-shadow: 10px 10px 0px rgba(51, 255, 0, 0.3);
+        }
+
+        .score-board h2 {
+            text-align: center;
+            color: var(--secondary-color);
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+            text-decoration: underline;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 15px 10px;
+            font-size: 0.9rem;
+        }
+
+        th {
+            color: var(--secondary-color);
+            border-bottom: 4px solid var(--primary-color);
+            text-transform: uppercase;
+        }
+
+        td {
+            border-bottom: 1px dotted #333;
+        }
+
+        /* Zarovnání skóre doprava */
+        .score-val {
+            text-align: right;
+            color: #fff;
+        }
+
+        /* Responzivita */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            .game-description { font-size: 0.6rem; }
+            th, td { font-size: 0.7rem; padding: 10px 5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>SPACE INVADERS</h1>
+
+    <div class="score-board">
+        <h2>TOP 10 PLAYERS</h2>
+        <table id="scoreTable">
+            <thead>
+                <tr>
+                    <th>RANK</th>
+                    <th>NAME</th>
+                    <th class="score-val">SCORE</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Funkce pro generování náhodného čísla
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Seznam jmen
+        const playerNames = [
+            "SkyWalker", "AlienHunter", "Neo", "Ripley", "StarLord", 
+            "HanSolo", "Vader", "Spock", "Kirk", "Yoda", "Matrix", "Tron",
+            "PlayerOne", "RetroKing", "LaserBoy"
+        ];
+
+        // 1. Vygenerujeme data
+        let highScores = [];
+        
+        for (let i = 0; i < 10; i++) {
+            const randomName = playerNames[Math.floor(Math.random() * playerNames.length)];
+            const randomScore = getRandomInt(55, 550); // Vyšší skóre vypadají lépe
+            
+            highScores.push({ name: randomName, score: randomScore });
+        }
+
+        // 2. Seřadíme pole (nejvyšší nahoře)
+        highScores.sort((a, b) => b.score - a.score);
+
+        // 3. Vložíme do HTML
+        const tableBody = document.querySelector("#scoreTable tbody");
+
+        highScores.forEach((player, index) => {
+            const row = document.createElement("tr");
+
+            // Rank
+            const rankCell = document.createElement("td");
+            rankCell.innerText = (index + 1) + "ST"; // Zjednodušené řadové číslovky
+            if (index === 0) {
+                rankCell.style.color = "yellow"; 
+                rankCell.innerText = "1ST 👑"; // Korunka pro prvního
+            }
+            if (index === 1) rankCell.innerText = "2ND";
+            if (index === 2) rankCell.innerText = "3RD";
+            if (index > 2) rankCell.innerText = (index + 1) + "TH";
+
+            // Name
+            const nameCell = document.createElement("td");
+            nameCell.innerText = player.name;
+            if (index === 0) nameCell.style.color = "yellow";
+
+            // Score
+            const scoreCell = document.createElement("td");
+            scoreCell.innerText = player.score.toLocaleString();
+            scoreCell.classList.add("score-val");
+            if (index === 0) scoreCell.style.color = "yellow";
+
+            row.appendChild(rankCell);
+            row.appendChild(nameCell);
+            row.appendChild(scoreCell);
+
+            tableBody.appendChild(row);
+        });
+    </script>
+
+</body>
+</html>
