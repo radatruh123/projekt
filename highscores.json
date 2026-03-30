@@ -1,0 +1,40 @@
+{
+  "highscores": [
+    {
+      "name": "radek",
+      "score": 820,
+      "time": 78,
+      "date": "30.03.2026 20:38"
+    },
+    {
+      "name": "mara",
+      "score": 530,
+      "time": 54,
+      "date": "30.03.2026 20:18"
+    },
+    {
+      "name": "radek",
+      "score": 520,
+      "time": 44,
+      "date": "30.03.2026 20:34"
+    },
+    {
+      "name": "radek",
+      "score": 495,
+      "time": 51,
+      "date": "30.03.2026 20:08"
+    },
+    {
+      "name": "rafael",
+      "score": 245,
+      "time": 19,
+      "date": "30.03.2026 21:00"
+    },
+    {
+      "name": "ondra",
+      "score": 120,
+      "time": 20,
+      "date": "30.03.2026 20:12"
+    }
+  ]
+}
