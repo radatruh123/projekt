@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<!-- DOCTYPE říká prohlížeči, že jde o moderní HTML5 dokument -->
+<html lang="cs">
+
+<head>
+  <meta charset="UTF-8">
+  <!-- UTF-8 kódování – podporuje háčky, čárky a diakritiku -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Správné zobrazení na mobilech: šířka = šířka obrazovky, žádný zoom -->
+
+  <title>Space Invaders – Highscores</title>
+
+  <style>
+    /* ============================================================
+       CSS styly pro stránku Highscores (Síň slávy)
+       ============================================================ */
+
+    /* Načtení vlastních Google fontů z internetu:
+       - Bebas Neue: blocková písma pro nadpisy a čísla
+       - Space Grotesk: moderní bezpatkové písmo pro text */
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;600;700&display=swap');
+
+    /* ── CSS proměnné (design system) ──────────────────────────
+       Centrální místo pro všechny barvy a styly.
+       Použití: var(--nazev) kdekoliv v CSS. */
+    :root {
+      --bg:          #f4f0ea;             /* Krémová barva pozadí */
+      --text:        #000;                /* Černá barva textu */
+      --primary:     #ff3366;             /* Agresivní červeno-růžová */
+      --accent:      #ffde00;             /* Arkádová žlutá */
+      --secondary:   #00c4b5;            /* Tyrkysová */
+      --border:      4px solid #000;     /* Silný černý rámeček */
+      --shadow:      8px 8px 0px #000;   /* Tvrdý pixel-art stín */
+      --shadow-hover:12px 12px 0px #000; /* Větší stín při hoveru */
+      --font-head:   'Bebas Neue', sans-serif;
+      --font-body:   'Space Grotesk', sans-serif;
+    }
+
+    /* Reset prohlížečových výchozích stylů (margin, padding, box model) */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Celá stránka ───────────────────────────────────────────
+       display: flex = sidebar a obsah vedle sebe
+       min-height: 100vh = minimálně celá výška okna prohlížeče */
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;  /* Zakáže horizontální scrollování */
+    }
+
+    /* ── BOČNÍ NAVIGACE ─────────────────────────────────────────
+       position: sticky + height: 100vh = panel zůstane viditelný i při scrollování */
+    .sidebar {
+      width: 280px;
+      background: var(--secondary);   /* Tyrkysové pozadí sidebaru (liší se od index.html!) */
+      border-right: var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 2rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      z-index: 10;   /* Sidebar je vždy viditelný nad ostatním obsahem */
+    }
+
+    .nav-logo {
+      font-family: var(--font-head);
+      font-size: 3.5rem;
+      line-height: 0.9;
+      color: var(--text);
+      text-decoration: none;
+      margin-bottom: 3rem;
+      text-transform: uppercase;
+    }
+
+    .nav-links { list-style: none; display: flex; flex-direction: column; gap: 1rem; flex-grow: 1; }
+
+    .nav-links a {
+      font-family: var(--font-head);
+      font-size: 1.8rem;
+      color: var(--text);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border: var(--border);
+      background: #fff;
+      box-shadow: 4px 4px 0px #000;
+      transition: 0.1s;    /* Plynulý přechod hover efektu */
+      display: block;
+      text-align: center;
+    }
+
+    /* Hover (najetí myší) nebo active (aktuální stránka) = zvýraznění */
+    .nav-links a:hover,
+    .nav-links a.active {
+      background: var(--primary);
+      color: #fff;
+      transform: translate(-2px, -2px);   /* Efekt "stisknutého" tlačítka */
+      box-shadow: 6px 6px 0px #000;
+    }
+
+    /* Blok pro přihlášeného uživatele (display: none = skrytý, JavaScript ho zobrazí) */
+    .nav-user {
+      margin-top: auto;
+      padding: 1rem;
+      background: #fff;
+      border: var(--border);
+      box-shadow: 4px 4px 0px #000;
+      display: none;
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+    }
+    .nav-user span { font-weight: 700; font-size: 1.2rem; }
+    .nav-user button { background: var(--text); color: #fff; border: none; padding: 0.5rem; font-family: var(--font-body); font-weight: 700; cursor: pointer; text-transform: uppercase; }
+    .nav-user button:hover { background: var(--primary); }
+
+    /* ── HLAVNÍ OBSAH ───────────────────────────────────────────
+       flex: 1 = zabere veškerý zbývající prostor vedle sidebaru */
+    .main-content { flex: 1; padding: 3rem; max-width: 1000px; }
+
+    /* ── HEADER BLOK (ozdobný titulek sekce) ────────────────────
+       transform: rotate(-1deg) = mírné otočení dodává živost a hravost */
+    .header-block {
+      background: var(--accent);
+      border: var(--border);
+      box-shadow: var(--shadow);
+      padding: 3rem;
+      margin-bottom: 3rem;
+      transform: rotate(-1deg);  /* Záměrně pootočený blok */
+    }
+    .header-block h1 {
+      font-family: var(--font-head);
+      font-size: 6rem;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+    .header-block p { font-size: 1.2rem; font-weight: 700; margin-top: 1rem; }
+
+    /* ── NÁSTROJOVÁ LIŠTA NAD TABULKOU ─────────────────────────
+       Obsahuje počet záznamů vlevo a tlačítko pro aktualizaci vpravo */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;  /* Rozloží obsah na krajní pozice */
+      align-items: center;
+      margin-bottom: 2rem;
+      font-weight: 700;
+      border-bottom: 4px solid #000;
+      padding-bottom: 1rem;
+    }
+
+    /* Obecný styl tlačítka (stejná logika jako v index.html) */
+    .btn {
+      font-family: var(--font-head);
+      font-size: 1.5rem;
+      padding: 0.5rem 1.5rem;
+      border: var(--border);
+      background: #fff;
+      color: #000;
+      cursor: pointer;
+      box-shadow: 4px 4px 0px #000;
+      text-transform: uppercase;
+      transition: 0.1s;
+    }
+    .btn:hover {
+      background: var(--primary);
+      color: #fff;
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0px #000;
+    }
+
+    /* ── TABULKA HIGHSCORES ─────────────────────────────────────*/
+    .table-wrap {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    /* border-collapse: collapse = sloučí okraje buněk (bez mezer) */
+
+    thead {
+      background: var(--text);   /* Černé záhlaví */
+      color: #fff;
+      font-family: var(--font-head);
+      font-size: 1.5rem;
+    }
+    th { padding: 1.2rem; text-align: left; }
+    td { padding: 1.2rem; border-bottom: 2px solid #000; font-weight: 600; font-size: 1.2rem; }
+    tr:last-child td { border-bottom: none; }  /* Poslední řádek bez spodní čáry */
+    tr:nth-child(even) { background: #f9f9f9; } /* Jemné stínování sudých řádků */
+
+    /* Speciální zvýraznění pro řádek aktuálního uživatele */
+    tr.mine td { background: var(--accent); }
+    /* ::after = pseudo-element přidá "(TY)" za jméno hráče ve vlastním řádku */
+    tr.mine td:nth-child(2)::after {
+      content: ' (TY)';
+      color: var(--primary);
+      font-family: var(--font-head);
+      font-size: 1.5rem;
+      margin-left: 0.5rem;
+    }
+
+    /* ── SPECIÁLNÍ STYLY PRO TOP 3 HRÁČE ───────────────────────
+       1. místo = červené (zlatá medaile vibe)
+       2. místo = světle šedé (stříbro)
+       3. místo = hnědé (bronz) */
+    .top-1 td { background: var(--primary); color: #fff; font-size: 1.5rem; }
+    .top-1 td.score-v { color: var(--accent); text-shadow: 2px 2px 0 #000; }
+    .top-2 td { background: #e0e0e0; }
+    .top-3 td { background: #d4a373; color: #000; }
+
+    /* Skóre – velký font v barvě primary */
+    .score-v { font-family: var(--font-head); font-size: 2rem; color: var(--primary); }
+
+    /* ── RESPONZIVITA ───────────────────────────────────────────
+       Na malých obrazovkách (max 900px) se sidebar přesune nad obsah */
+    @media(max-width: 900px) {
+      body { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        border-right: none;
+        border-bottom: var(--border);
+        padding: 1rem;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .nav-logo { margin-bottom: 0; font-size: 2.5rem; }
+      .nav-links { flex-direction: row; gap: 0.5rem; width: 100%; margin-top: 1rem; }
+      .nav-links a { font-size: 1.2rem; flex: 1; }
+      .main-content { padding: 1.5rem; }
+      .header-block h1 { font-size: 3.5rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- BOČNÍ NAVIGACE – stejná struktura jako v index.html -->
+<aside class="sidebar">
+  <a class="nav-logo" href="index.html">SPACE<br>INVADERS</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Menu</a></li>
+    <li><a href="highscores.html" class="active">Žebříček</a></li>
+    <!-- class="active" = tato stránka je právě otevřena -->
+    <li><a href="login.html"    id="nlLogin">Login</a></li>
+    <li><a href="register.html" id="nlRegister">Registrace</a></li>
+  </ul>
+  <div class="nav-user" id="navUser">
+    <span>PILOT:</span>
+    <span id="navName" style="color: var(--primary); font-family: var(--font-head); font-size:2rem;"></span>
+    <button onclick="logout()">EJECT</button>
+  </div>
+</aside>
+
+<!-- HLAVNÍ OBSAH STRÁNKY -->
+<main class="main-content">
+
+  <!-- Ozdobný záhlaví blok – mírně pootočený pro hravý efekt -->
+  <div class="header-block">
+    <h1>Síň Slávy</h1>
+    <p>Tady končí legrace. Pouze tvé absolutní maximum.</p>
+  </div>
+
+  <!-- Nástrojová lišta: počet záznamů + tlačítko refresh -->
+  <div class="toolbar">
+    <span id="count" style="font-size: 1.2rem; text-transform: uppercase;"></span>
+    <!-- id="count" – JavaScript sem zapíše "Počet záznamů: X" -->
+    <div style="display:flex; gap: 1rem; align-items: center;">
+      <span id="updated" style="font-size: 0.9rem;"></span>
+      <!-- id="updated" – JavaScript sem zapíše čas poslední aktualizace -->
+      <button class="btn" onclick="loadHS()">Aktualizovat</button>
+    </div>
+  </div>
+
+  <!-- Tabulka highscores -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>   <!-- Pořadí (1., 2., 3. …) -->
+          <th>Hráč</th>   <!-- Jméno hráče -->
+          <th>Skóre</th>  <!-- Dosažené skóre -->
+          <th>Čas (s)</th><!-- Délka hry v sekundách -->
+          <th>Datum</th>  <!-- Datum a čas záznamu -->
+        </tr>
+      </thead>
+      <!-- Tělo tabulky – naplní JavaScript funkce loadHS() -->
+      <tbody id="hsBody">
+        <tr>
+          <td colspan="5" style="text-align:center; padding: 3rem;">Načítám data ze sítě...</td>
+          <!-- colspan="5" = tato jediná buňka roztažena přes všechny sloupce -->
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- ── JAVASCRIPT ────────────────────────────────────────────────── -->
+<script>
+
+  /* ── Pomocné funkce ───────────────────────────────────────────── */
+
+  /**
+   * Escapuje HTML znaky – ochrana před XSS (Cross-Site Scripting).
+   * Pokud by jméno hráče obsahovalo HTML kód (např. <script>), tato funkce
+   * ho zobrazí jako prostý text, ne jako funkční kód.
+   */
+  function esc(t) {
+    const d = document.createElement('div');
+    d.textContent = t;  // textContent NEZPRACUJE HTML – zobrazí ho jako text
+    return d.innerHTML;
+  }
+
+  /**
+   * Načte přezdívku přihlášeného hráče z localStorage prohlížeče.
+   * localStorage = trvalé úložiště v prohlížeči (přežije zavření záložky).
+   * @returns {string|null} – přezdívka nebo null, pokud nikdo není přihlášen
+   */
+  function getSession() {
+    return localStorage.getItem('si_session') || null;
+  }
+
+  /** Odhlásí uživatele a znovu načte stránku. */
+  function logout() {
+    localStorage.removeItem('si_session');
+    location.reload();
+  }
+
+  /* ── Inicializace navigace ────────────────────────────────────── */
+  /**
+   * Zobrazí jméno přihlášeného hráče v sidebaru a schová Login/Registrace.
+   * Pokud nikdo není přihlášen, navigace se nezmění.
+   */
+  function initNav() {
+    const s = getSession();
+    if (!s) return;  // Není nikdo přihlášen – funkce skončí zde
+
+    const users = JSON.parse(localStorage.getItem('si_users') || '{}');
+    if (!users[s]) return;  // Session je, ale uživatel v databázi není
+
+    // Zobraz blok přihlášeného uživatele
+    document.getElementById('navUser').style.display = 'flex';
+    document.getElementById('navName').textContent = s;
+
+    // Skryj zbytečné položky navigace
+    document.getElementById('nlLogin').style.display    = 'none';
+    document.getElementById('nlRegister').style.display = 'none';
+  }
+
+  /* ── Deduplikace highscores ───────────────────────────────────── */
+  /**
+   * Z pole všech záznamů vybere pro každého hráče jen jeho nejlepší skóre.
+   * Výsledek je seřazen od nejvyššího skóre.
+   * @param {Array} list – surová data z highscores.json
+   * @returns {Array} – seřazená a deduplikovaná data
+   */
+  function dedup(list) {
+    const map = {};  // Slovník: klíč = jméno hráče (lowercase), hodnota = nejlepší záznam
+    for (const e of list) {
+      const n = (e.name || e.username || '').toLowerCase();
+      // Pokud hráč v mapě ještě není, nebo je toto skóre lepší – uložíme
+      if (!map[n] || e.score > map[n].score) map[n] = e;
+    }
+    // Převedeme hodnoty mapy na pole a seřadíme sestupně (b-a = od největšího)
+    return Object.values(map).sort((a, b) => b.score - a.score);
+  }
+
+  /* ── Načtení a zobrazení highscores ──────────────────────────── */
+  /**
+   * Stáhne highscores.json ze serveru a zobrazí výsledky v tabulce.
+   * Označí řádek aktuálního uživatele a zvýrazní top 3.
+   *
+   * async = tato funkce může "čekat" na odpověď ze serveru (asynchronní)
+   * await = počkej na výsledek, ale nezablokuj prohlížeč
+   */
+  async function loadHS() {
+    try {
+      // Date.now() přidá časový otisk → prohlížeč nemůže cachovat starou odpověď
+      const r    = await fetch('highscores.json?t=' + Date.now());
+      const data = await r.json();          // Parsování JSON odpovědi
+      const rows = dedup(data.highscores || []);  // Deduplikuj záznamy
+      const session = getSession();              // Jméno přihlášeného hráče (nebo null)
+
+      // Zobrazíme počet unikátních hráčů v žebříčku
+      document.getElementById('count').textContent =
+        rows.length ? `Počet záznamů: ${rows.length}` : '';
+
+      // Čas poslední aktualizace
+      document.getElementById('updated').textContent =
+        'Sync: ' + new Date().toLocaleTimeString('cs-CZ');
+
+      const b = document.getElementById('hsBody');  // Odkaz na <tbody> element
+
+      if (!rows.length) {
+        b.innerHTML = '<tr><td colspan="5" style="text-align:center;">Prázdno.</td></tr>';
+        return;
+      }
+
+      // Vytvoříme HTML pro každý řádek tabulky
+      b.innerHTML = rows.map((e, i) => {
+        const name   = e.name || e.username || '?';
+        // Pokud je session shodná s jménem hráče, označíme ho jako "mine"
+        const isMine = session && name.toLowerCase() === session.toLowerCase();
+
+        // Přiřaď CSS třídu podle pořadí (top 3 mají speciální styl)
+        let rankClass = '';
+        if      (i === 0) rankClass = 'top-1';
+        else if (i === 1) rankClass = 'top-2';
+        else if (i === 2) rankClass = 'top-3';
+
+        // Template literal (backtick string) umožňuje víceřádkový HTML + vložení proměnných
+        return `<tr class="${isMine ? 'mine' : ''} ${rankClass}">
+          <td style="font-family:var(--font-head); font-size:1.8rem;">#${i + 1}</td>
+          <td style="text-transform:uppercase;">${esc(name)}</td>
+          <td class="score-v">${e.score}</td>
+          <td>${e.time}</td>
+          <td style="font-size:0.9rem;">${e.date || ''}</td>
+        </tr>`;
+      }).join('');  // join('') spojí všechny řádky do jednoho HTML stringu
+
+    } catch {
+      // Chyba při načítání (server nedostupný, soubor neexistuje…)
+      document.getElementById('hsBody').innerHTML =
+        '<tr><td colspan="5" style="text-align:center; color:red;">[ERROR] Spojení přerušeno.</td></tr>';
+    }
+  }
+
+  /* ── Spuštění při načtení stránky ───────────────────────────── */
+  initNav();  // Nastav navigaci podle stavu přihlášení
+  loadHS();   // Načti a zobraz highscores ihned po načtení stránky
+
+  // setInterval = opakuj funkci každých X milisekund
+  // 10000 ms = 10 sekund → žebříček se automaticky obnovuje každých 10s
+  setInterval(loadHS, 10000);
+</script>
+
+</body>
+</html>
