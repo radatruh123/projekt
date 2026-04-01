@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<!-- DOCTYPE říká prohlížeči, že jde o moderní HTML5 dokument -->
+<html lang="cs">
+
+<head>
+  <meta charset="UTF-8">
+  <!-- UTF-8 kódování = podpora háčků a čárek -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Správné zobrazení na mobilních zařízeních -->
+
+  <title>Space Invaders – Login</title>
+
+  <style>
+    /* ============================================================
+       CSS styly pro přihlašovací stránku (Login)
+       Stránka je rozdělena na dvě poloviny (split screen):
+         - Levá  = barevný blok s nápisem "Vítej Zpět."
+         - Pravá = formulář pro zadání přezdívky a hesla
+       ============================================================ */
+
+    /* Načtení Google fontů z internetu */
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;600;700&display=swap');
+
+    /* ── CSS proměnné – barvy a stíny na jednom místě ───────────
+       Kdykoli potřebuješ změnit barvu, stačí to udělat jen zde. */
+    :root {
+      --bg:        #fff;                /* Bílé pozadí (pravá polovina) */
+      --text:      #000;                /* Černá barva textu */
+      --primary:   #ff3366;             /* Červeno-růžová – hlavní akcentová barva */
+      --accent:    #ffde00;             /* Žlutá – pro hover efekty a tlačítka */
+      --secondary: #00c4b5;            /* Tyrkysová */
+      --border:    4px solid #000;     /* Silný černý okraj */
+      --shadow:    8px 8px 0px #000;   /* Tvrdý stín bez rozmazání */
+      --font-head: 'Bebas Neue', sans-serif;
+      --font-body: 'Space Grotesk', sans-serif;
+    }
+
+    /* Reset výchozích prohlížečových stylů */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── CELÁ STRÁNKA ───────────────────────────────────────────
+       display: flex = levá a pravá polovina vedle sebe
+       min-height: 100vh = stránka vždy zabírá celou výšku okna */
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── LEVÁ POLOVINA (barevná) ────────────────────────────────
+       flex: 1 = zabírá stejnou část jako pravá (50/50 split)
+       overflow: hidden = zabrání, aby obrovský bg-text přetekl ven */
+    .split-left {
+      flex: 1;
+      background: var(--primary);     /* Červené pozadí levé poloviny */
+      border-right: var(--border);    /* Silná černá dělicí čára uprostřed */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;        /* Obsah na střed vertikálně */
+      padding: 4rem;
+      position: relative;             /* Potřeba pro absolutní pozicování bg-text */
+      overflow: hidden;
+    }
+
+    /* Velký text "VÍTEJ ZPĚT" */
+    .split-left h1 {
+      font-family: var(--font-head);
+      font-size: clamp(5rem, 8vw, 10rem);
+      /* clamp(min, cíl, max) = responzivní velikost:
+         min 5rem, ideálně 8% šířky okna, max 10rem */
+      line-height: 0.8;
+      color: #000;
+      text-transform: uppercase;
+      z-index: 2;   /* Nad bg-text elementem */
+    }
+
+    /* Obrovský průhledný text v pozadí levé poloviny (dekorativní)
+       position: absolute + pointer-events: none = neklikatelný dekorativní prvek */
+    .split-left .bg-text {
+      position: absolute;
+      font-family: var(--font-head);
+      font-size: 30vw;              /* 30% šířky okna = obrovský */
+      color: rgba(0, 0, 0, 0.1);   /* Průhledná černá – jen lehký nádech */
+      transform: rotate(-10deg);    /* Mírné otočení pro dynamiku */
+      top: -10%;
+      left: -10%;
+      pointer-events: none;         /* Kliknutí "propadne skrz" tento element */
+      z-index: 1;                   /* Za h1 textem */
+    }
+
+    /* ── PRAVÁ POLOVINA (formulář) ──────────────────────────────
+       position: relative = potřeba pro správné umístění vnitřních prvků */
+    .split-right {
+      flex: 1;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      padding: 2rem;
+      position: relative;
+    }
+
+    /* ── HORNÍ NAVIGACE (zpět + registrace) ────────────────────
+       Malé navigační tlačítka v pravém horním rohu formuláře */
+    .top-nav {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;  /* Zarovnání k pravému okraji */
+      margin-bottom: auto;        /* Odtlačí formulář dolů na střed */
+    }
+
+    .top-nav a {
+      font-family: var(--font-head);
+      font-size: 1.5rem;
+      text-decoration: none;
+      color: #000;
+      border: 2px solid #000;
+      padding: 0.5rem 1rem;
+      transition: 0.1s;           /* Plynulý hover přechod */
+      text-transform: uppercase;
+    }
+
+    .top-nav a:hover {
+      background: var(--accent);
+      transform: translate(-2px, -2px);   /* Efekt stisknutí */
+      box-shadow: 4px 4px 0px #000;
+    }
+
+    /* ── FORMULÁŘOVÝ BOX ────────────────────────────────────────
+       Centrovný kontejner s formulářem, max-width omezuje šířku */
+    .form-box {
+      width: 100%;
+      max-width: 450px;
+      margin: auto;   /* auto na margin = centrování v obou osách uvnitř flex */
+    }
+
+    .form-box h2 {
+      font-family: var(--font-head);
+      font-size: 4rem;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    /* Podtitulek formuláře s barevnou levou čarou (citační styl) */
+    .form-box p {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      border-left: 4px solid var(--primary);
+      padding-left: 1rem;
+    }
+
+    /* ── SKUPINA FORMULÁŘOVÉHO POLE (label + input) ─────────────
+       .fg = "form group" – jeden pár popisku a vstupního pole */
+    .fg { margin-bottom: 1.5rem; }
+
+    /* Popisek nad inputem */
+    .fg label {
+      display: block;           /* Label na vlastním řádku (ne inline) */
+      font-family: var(--font-head);
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+
+    /* Vstupní pole (textové, heslo) */
+    .fg input {
+      width: 100%;
+      padding: 1rem;
+      border: var(--border);
+      background: #f9f9f9;
+      font-family: var(--font-body);
+      font-size: 1.2rem;
+      font-weight: 600;
+      outline: none;    /* Odstraní výchozí modrý prohlížečový rámeček při fokusu */
+      transition: 0.1s;
+    }
+
+    /* Efekt při aktivním inputu (kliknutí do pole) */
+    .fg input:focus {
+      background: #fff;
+      box-shadow: 6px 6px 0px var(--accent);  /* Žlutý stín = "arkádový" focus styl */
+      transform: translate(-2px, -2px);         /* Lehký posun nahoru/vlevo */
+    }
+
+    /* ── UPOZORNĚNÍ (chybová / úspěšná zpráva) ──────────────────
+       display: none = schované; JavaScript je zobrazí přidáním třídy "show" */
+    .alert {
+      padding: 1rem;
+      border: var(--border);
+      font-weight: 700;
+      margin-bottom: 2rem;
+      display: none;
+      box-shadow: 4px 4px 0px #000;
+    }
+    .alert.error   { background: var(--primary); color: #fff; }  /* Chyba = červená */
+    .alert.success { background: var(--secondary); color: #000; } /* Úspěch = tyrkys */
+    .alert.show    { display: block; }  /* JS přidá "show" → zpráva se zobrazí */
+
+    /* ── HLAVNÍ TLAČÍTKO FORMULÁŘE ──────────────────────────────
+       width: 100% = roztáhne se přes celou šířku form-boxu */
+    .btn-full {
+      width: 100%;
+      padding: 1.2rem;
+      font-family: var(--font-head);
+      font-size: 2rem;
+      border: var(--border);
+      cursor: pointer;
+      background: var(--accent);  /* Žlutá = neutrální, ne příliš agresivní */
+      color: #000;
+      transition: 0.1s;
+      text-transform: uppercase;
+      margin-top: 1rem;
+    }
+
+    /* Hover efekt tlačítka – zčerní pozadí */
+    .btn-full:hover {
+      background: var(--text);
+      color: #fff;
+      transform: translate(-4px, -4px);
+      box-shadow: var(--shadow);
+    }
+
+    /* Deaktivované tlačítko (během přihlašování) – nereaguje na kliknutí */
+    .btn-full:disabled {
+      opacity: 0.5;
+      pointer-events: none;   /* Zakáže všechny myší interakce */
+    }
+
+    /* ── RESPONZIVITA ───────────────────────────────────────────
+       Na mobilech se split screen přepne na jeden sloupeček */
+    @media(max-width: 900px) {
+      body { flex-direction: column; }
+      .split-left {
+        padding: 2rem;
+        border-right: none;
+        border-bottom: var(--border);
+        flex: none;         /* Nezabere celý zbytek – jen 30vh */
+        height: 30vh;
+      }
+      .split-left h1 { font-size: 4rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ── LEVÁ POLOVINA (vizuální / dekorativní) ─────────────────────
+     Zobrazuje jen velký nápis "Vítej Zpět." na červeném pozadí.
+     Žádná funkční logika – čistě estetika a branding. -->
+<div class="split-left">
+  <!-- Obrovský průhledný text v pozadí (dekorativní) -->
+  <div class="bg-text">PLAY</div>
+  <!-- Hlavní nápis levé poloviny -->
+  <h1>Vítej<br>Zpět.</h1>
+</div>
+
+<!-- ── PRAVÁ POLOVINA (formulář + navigace) ──────────────────────
+     Obsahuje navigační tlačítka nahoře a přihlašovací formulář uprostřed. -->
+<div class="split-right">
+
+  <!-- Malá navigace v pravém horním rohu -->
+  <div class="top-nav">
+    <a href="index.html">Zpět na web</a>
+    <!-- Inline style přebije třídu .top-nav a pro konkrétní tlačítko -->
+    <a href="register.html" style="background:var(--secondary);">Registrace</a>
+  </div>
+
+  <!-- Formulářový kontejner -->
+  <div class="form-box">
+    <h2>Login</h2>
+    <p>Zadej údaje a naskoč do kokpitu.</p>
+
+    <!-- Chybová zpráva – zobrazí JS funkce showErr() -->
+    <div class="alert error"   id="err"></div>
+    <!-- Úspěšná zpráva – zobrazí JS funkce showOk() -->
+    <div class="alert success" id="ok"></div>
+
+    <!-- Pole pro přezdívku -->
+    <div class="fg">
+      <label>Přezdívka</label>
+      <!-- autocomplete="username" = prohlížeč nabídne uložené přezdívky -->
+      <input type="text" id="username" autocomplete="username">
+    </div>
+
+    <!-- Pole pro heslo -->
+    <div class="fg">
+      <label>Heslo</label>
+      <!-- type="password" = text se zobrazí jako tečky/hvězdičky -->
+      <input type="password" id="password" autocomplete="current-password">
+    </div>
+
+    <!-- Odesílací tlačítko – onclick zavolá JavaScript funkci doLogin() -->
+    <button class="btn-full" id="btn" onclick="doLogin()">Start Game</button>
+  </div>
+
+</div>
+
+<!-- ── JAVASCRIPT ────────────────────────────────────────────────── -->
+<script>
+
+  /* Pokud je uživatel již přihlášen (má session v localStorage),
+     přesměrujeme ho rovnou na úvodní stránku – formulář nepotřebuje. */
+  if (localStorage.getItem('si_session')) location.href = 'index.html';
+
+  /* Listener na celý dokument – Enter v jakémkoli poli spustí přihlášení.
+     addEventListener('keydown', ...) = zaregistruje funkci při stisku klávesy.
+     Arrow funkce (e => ...) je zkrácený zápis funkce. */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  /* ── Zobrazení zpráv ──────────────────────────────────────────── */
+
+  /**
+   * Zobrazí červenou chybovou zprávu.
+   * Přidá CSS třídu "show" → element se zobrazí (display: block).
+   * @param {string} msg – text chybové zprávy
+   */
+  function showErr(msg) {
+    const e = document.getElementById('err');
+    e.textContent = 'ERR: ' + msg;
+    e.classList.add('show');
+    // Zároveň skryjeme zprávu o úspěchu (nesmí být vidět obě najednou)
+    document.getElementById('ok').classList.remove('show');
+  }
+
+  /**
+   * Zobrazí zelenou/tyrkysovou zprávu o úspěchu.
+   * @param {string} msg – text zprávy
+   */
+  function showOk(msg) {
+    const e = document.getElementById('ok');
+    e.textContent = 'OK: ' + msg;
+    e.classList.add('show');
+    document.getElementById('err').classList.remove('show');
+  }
+
+  /* ── Přihlašovací logika ──────────────────────────────────────── */
+
+  /**
+   * Hlavní funkce přihlášení. Spustí se při kliknutí na tlačítko nebo Enteru.
+   *
+   * Postup:
+   *   1. Načte hodnoty z polí (přezdívka, heslo)
+   *   2. Zkontroluje, že nejsou prázdné
+   *   3. Deaktivuje tlačítko (zabrání dvojitému kliknutí)
+   *   4. Po krátké prodlevě (setTimeout) porovná heslo s uloženým hashem
+   *   5. Při úspěchu uloží session a přesměruje na hlavní stránku
+   */
+  function doLogin() {
+    const btn  = document.getElementById('btn');
+    const user = document.getElementById('username').value.trim(); // .trim() odstraní mezery z okrajů
+    const pass = document.getElementById('password').value;
+
+    // Základní validace – obě pole musí být vyplněna
+    if (!user || !pass) {
+      showErr('Vyplň všechno.');
+      return;  // Ukončí funkci – nic dalšího se neprovede
+    }
+
+    // Deaktivujeme tlačítko a změníme text – uživatel ví, že se něco děje
+    btn.disabled    = true;
+    btn.textContent = 'ČEKÁM...';
+
+    /* setTimeout = spustí kód po X milisekundách (asynchronně).
+       400ms prodleva = zabrání okamžitému přihlášení (UX feedback). */
+    setTimeout(() => {
+      // Načteme všechny uložené uživatele z localStorage
+      // '{}' = výchozí hodnota pokud si_users ještě neexistuje
+      const users = JSON.parse(localStorage.getItem('si_users') || '{}');
+
+      /* Ověříme:
+         1. Uživatel s tímto jménem existuje (users[user])
+         2. Uložený hash hesla se shoduje s hashem zadaného hesla */
+      if (!users[user] || users[user].password !== simpleHash(pass)) {
+        showErr('Špatné jméno nebo heslo.');
+        btn.disabled    = false;
+        btn.textContent = 'START GAME';
+        return;
+      }
+
+      // Přihlášení úspěšné – uložíme session do localStorage
+      // 'si_session' = klíč, user = přezdívka přihlášeného hráče
+      localStorage.setItem('si_session', user);
+      showOk('Přihlášeno. Nabíhám...');
+
+      // Po 800ms přesměrujeme na hlavní stránku
+      setTimeout(() => location.href = 'index.html', 800);
+
+    }, 400);
+  }
+
+  /* ── Hashování hesla ──────────────────────────────────────────── */
+
+  /**
+   * Jednoduchá hashovací funkce (djb2 algoritmus).
+   * Hash = jednosměrná transformace – z hashe nelze zpětně dostat heslo.
+   *
+   * POZOR: Tato funkce je určena jen pro školní projekt.
+   * V reálné aplikaci by se používal bcrypt nebo Argon2 na serveru!
+   *
+   * @param {string} str – heslo v prostém textu
+   * @returns {string} – hash jako hexadecimální číslo (základ 36)
+   */
+  function simpleHash(str) {
+    let h = 5381;  // Počáteční hodnota hashe (magické číslo pro djb2)
+    for (let i = 0; i < str.length; i++) {
+      // (h << 5) = h * 32, pak + h = h * 33
+      // ^ = XOR (bitová operace) s ASCII kódem znaku
+      h = ((h << 5) + h) ^ str.charCodeAt(i);
+    }
+    // >>> 0 = převede na unsigned 32-bit integer (zabráníme záporným číslům)
+    // .toString(36) = převede do base-36 (čísla + písmena a-z)
+    return (h >>> 0).toString(36);
+  }
+
+</script>
+
+</body>
+</html>

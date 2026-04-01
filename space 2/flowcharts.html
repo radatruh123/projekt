@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Space Invaders – Diagramy</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;600;700&display=swap');
+
+    :root {
+      --bg: #f4f0ea;
+      --text: #000000;
+      --primary: #ff3366;
+      --accent: #ffde00;
+      --secondary: #00c4b5;
+      --border: 4px solid #000;
+      --shadow: 8px 8px 0px #000;
+      --shadow-hover: 12px 12px 0px #000;
+      --font-head: 'Bebas Neue', sans-serif;
+      --font-body: 'Space Grotesk', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      width: 280px; background: var(--accent); border-right: var(--border);
+      display: flex; flex-direction: column; padding: 2rem;
+      position: sticky; top: 0; height: 100vh; z-index: 10;
+    }
+    .nav-logo {
+      font-family: var(--font-head); font-size: 3.5rem; line-height: 0.9;
+      color: var(--text); text-decoration: none; margin-bottom: 3rem;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .nav-links { list-style: none; display: flex; flex-direction: column; gap: 1rem; flex-grow: 1; }
+    .nav-links a {
+      font-family: var(--font-head); font-size: 1.8rem; color: var(--text);
+      text-decoration: none; padding: 0.5rem 1rem; border: var(--border);
+      background: #fff; box-shadow: 4px 4px 0px #000; transition: 0.1s;
+      display: block; text-align: center;
+    }
+    .nav-links a:hover, .nav-links a.active {
+      background: var(--primary); color: #fff; transform: translate(-2px, -2px); box-shadow: 6px 6px 0px #000;
+    }
+    .nav-user {
+      margin-top: auto; padding: 1rem; background: #fff; border: var(--border);
+      box-shadow: 4px 4px 0px #000; display: none; flex-direction: column; gap: 0.5rem; text-align: center;
+    }
+    .nav-user span { font-weight: 700; font-size: 1.2rem; }
+    .nav-user button {
+      background: var(--text); color: #fff; border: none; padding: 0.5rem;
+      font-family: var(--font-body); font-weight: 700; cursor: pointer; text-transform: uppercase;
+    }
+    .nav-user button:hover { background: var(--primary); }
+
+    .main-content { flex: 1; padding: 3rem; max-width: 1100px; }
+
+    .page-header {
+      background: var(--primary); border: var(--border); box-shadow: var(--shadow);
+      padding: 3rem; margin-bottom: 4rem; position: relative;
+    }
+    .page-header::after {
+      content: 'GAME LOGIC'; position: absolute; top: -15px; right: -15px;
+      background: var(--accent); border: var(--border); padding: 0.5rem 1rem;
+      font-family: var(--font-head); font-size: 1.5rem; transform: rotate(5deg);
+    }
+    .page-header h1 {
+      font-family: var(--font-head); font-size: clamp(3rem, 8vw, 6rem);
+      line-height: 0.85; color: #fff; margin-bottom: 1rem; text-transform: uppercase;
+    }
+    .page-header p {
+      font-size: 1.1rem; font-weight: 600; color: #fff; max-width: 600px;
+      border-left: 6px solid #fff; padding-left: 1rem;
+    }
+
+    .diagram-block {
+      margin-bottom: 4rem; border: var(--border); background: #fff;
+      box-shadow: var(--shadow); overflow: hidden;
+    }
+    .diagram-head {
+      background: var(--text); color: #fff; padding: 1.2rem 2rem;
+      display: flex; align-items: baseline; gap: 1.5rem;
+    }
+    .diagram-num {
+      font-family: var(--font-head); font-size: 5rem; line-height: 1;
+      color: var(--accent); min-width: 80px;
+    }
+    .diagram-title-wrap { display: flex; flex-direction: column; gap: 0.3rem; }
+    .diagram-title { font-family: var(--font-head); font-size: 2.2rem; color: #fff; letter-spacing: 1px; }
+    .diagram-subtitle { font-size: 0.95rem; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 2px; }
+
+    .diagram-desc {
+      padding: 1.5rem 2rem; background: #f4f0ea;
+      border-bottom: var(--border); display: grid;
+      grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;
+    }
+    .desc-item { display: flex; flex-direction: column; gap: 0.3rem; }
+    .desc-label {
+      font-family: var(--font-head); font-size: 1.1rem;
+      color: var(--primary); letter-spacing: 1px;
+    }
+    .desc-text { font-size: 0.9rem; font-weight: 600; line-height: 1.4; color: #333; }
+
+    .diagram-svg-wrap {
+      padding: 2rem; background: #fff; overflow-x: auto;
+    }
+    .diagram-svg-wrap svg {
+      display: block; width: 100%; height: auto; max-width: 900px; margin: 0 auto;
+    }
+
+    /* SVG theming */
+    svg text { font-family: 'Space Grotesk', sans-serif; }
+
+    @media(max-width: 900px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: var(--border); padding: 1rem; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+      .nav-logo { margin-bottom: 0; font-size: 2.5rem; }
+      .nav-links { flex-direction: row; gap: 0.5rem; width: 100%; margin-top: 1rem; }
+      .nav-links a { font-size: 1.2rem; flex: 1; }
+      .main-content { padding: 1.5rem; }
+      .diagram-desc { grid-template-columns: 1fr; }
+      .diagram-num { font-size: 3.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="nav-logo" href="index.html">SPACE<br>INVADERS</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Menu</a></li>
+    <li><a href="highscores.html">Žebříček</a></li>
+    <li><a href="docs.html">Docs</a></li>
+    <li><a href="flowcharts.html" class="active">Diagramy</a></li>
+    <li><a href="login.html" id="nlLogin">Login</a></li>
+    <li><a href="register.html" id="nlRegister">Registrace</a></li>
+  </ul>
+  <div class="nav-user" id="navUser">
+    <span>PILOT:</span>
+    <span id="navName" style="color: var(--primary); font-family: var(--font-head); font-size:2rem;"></span>
+    <button onclick="logout()">EJECT (Odhlásit)</button>
+  </div>
+</aside>
+
+<main class="main-content">
+
+  <section class="page-header">
+    <h1>Architektura<br>hry</h1>
+    <p>Tři klíčové vývojové diagramy, které popisují, jak Space Invaders funguje pod kapotou – od hlavní smyčky přes kolize až po systém powerupů.</p>
+  </section>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- DIAGRAM 1: Hlavní herní smyčka (Game Loop)       -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="diagram-block">
+    <div class="diagram-head">
+      <div class="diagram-num">01</div>
+      <div class="diagram-title-wrap">
+        <div class="diagram-title">Hlavní herní smyčka</div>
+        <div class="diagram-subtitle">Game Loop &amp; Správa stavů</div>
+      </div>
+    </div>
+    <div class="diagram-desc">
+      <div class="desc-item">
+        <div class="desc-label">Co zobrazuje</div>
+        <div class="desc-text">Tok programu od spuštění přes menu až po aktivní hru – jak hra rozhoduje, co se zrovna děje na obrazovce.</div>
+      </div>
+      <div class="desc-item">
+        <div class="desc-label">Proč je to důležité</div>
+        <div class="desc-text">Každý snímek (60× za sekundu) hra projde celou touto smyčkou. Bez ní by nebylo pohybu, zvuku ani reakce na vstup.</div>
+      </div>
+      <div class="desc-item">
+        <div class="desc-label">Klíčové stavy</div>
+        <div class="desc-text">MENU → SETTINGS nebo GAME → PAUSE nebo GAME_OVER → zpět do MENU. Každý stav kreslí jiné věci na obrazovku.</div>
+      </div>
+    </div>
+    <div class="diagram-svg-wrap">
+      <svg viewBox="0 0 680 820" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+
+        <!-- START -->
+        <rect x="260" y="20" width="160" height="44" rx="22" fill="#000" stroke="#000" stroke-width="1"/>
+        <text x="340" y="42" text-anchor="middle" dominant-baseline="central" fill="#ffde00" font-size="13" font-weight="700" font-family="Space Grotesk, sans-serif">SPUŠTĚNÍ HRY</text>
+
+        <!-- Arrow START -> pygame init -->
+        <line x1="340" y1="64" x2="340" y2="100" stroke="#000" stroke-width="1.5" marker-end="url(#arr1)"/>
+
+        <!-- pygame.init() -->
+        <rect x="210" y="100" width="260" height="48" rx="6" fill="#e6f1fb" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="120" text-anchor="middle" dominant-baseline="central" fill="#0c447c" font-size="13" font-weight="700" font-family="Space Grotesk, sans-serif">pygame.init() + načtení obrázků</text>
+        <text x="340" y="138" text-anchor="middle" dominant-baseline="central" fill="#185fa5" font-size="11" font-family="Space Grotesk, sans-serif">okno, hodiny, hvězdy, fonty</text>
+
+        <!-- Arrow -->
+        <line x1="340" y1="148" x2="340" y2="184" stroke="#000" stroke-width="1.5" marker-end="url(#arr1)"/>
+
+        <!-- Stav = MENU -->
+        <rect x="200" y="184" width="280" height="48" rx="6" fill="#faeeda" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="204" text-anchor="middle" dominant-baseline="central" fill="#633806" font-size="13" font-weight="700" font-family="Space Grotesk, sans-serif">Stav = MENU</text>
+        <text x="340" y="222" text-anchor="middle" dominant-baseline="central" fill="#854f0b" font-size="11" font-family="Space Grotesk, sans-serif">draw_menu() · animace hvězd · raketka</text>
+
+        <!-- Arrow -->
+        <line x1="340" y1="232" x2="340" y2="268" stroke="#000" stroke-width="1.5" marker-end="url(#arr1)"/>
+
+        <!-- Rozhodovaci diamond MENU -->
+        <polygon points="340,268 430,302 340,336 250,302" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="296" text-anchor="middle" dominant-baseline="central" fill="#000" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">Klik na menu?</text>
+        <text x="340" y="312" text-anchor="middle" dominant-baseline="central" fill="#555" font-size="10" font-family="Space Grotesk, sans-serif">Start / Settings / Quit</text>
+
+        <!-- Settings větev - doleva -->
+        <line x1="250" y1="302" x2="130" y2="302" stroke="#000" stroke-width="1.5" marker-end="url(#arr1)"/>
+        <text x="190" y="292" text-anchor="middle" fill="#000" font-size="11" font-family="Space Grotesk, sans-serif" font-weight="600">Settings</text>
+        <rect x="30" y="278" width="100" height="48" rx="6" fill="#e1f5ee" stroke="#000" stroke-width="1.5"/>
+        <text x="80" y="296" text-anchor="middle" dominant-baseline="central" fill="#085041" font-size="11" font-weight="700" font-family="Space Grotesk, sans-serif">SETTINGS</text>
+        <text x="80" y="314" text-anchor="middle" dominant-baseline="central" fill="#0f6e56" font-size="10" font-family="Space Grotesk, sans-serif">rozlišení, fullscreen</text>
+        <!-- Settings back to MENU -->
+        <path d="M 80 326 L 80 380 L 200 380" fill="none" stroke="#888" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#arr1)"/>
+        <text x="100" y="374" fill="#888" font-size="10" font-family="Space Grotesk, sans-serif">ENTER / ESC</text>
+
+        <!-- Quit větev - dole -->
+        <line x1="340" y1="336" x2="560" y2="336" stroke="#000" stroke-width="1.5"/>
+        <line x1="560" y1="336" x2="560" y2="362" stroke="#000" stroke-width="1.5" marker-end="url(#arr1)"/>
+        <text x="450" y="328" text-anchor="middle" fill="#000" font-size="11" font-family="Space Grotesk, sans-serif" font-weight="600">Quit</text>
+        <rect x="490" y="362" width="130" height="44" rx="22" fill="#e24b4a" stroke="#000" stroke-width="1.5"/>
+        <text x="555" y="384" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">sys.exit()</text>
+
+        <!-- Start větev - dolů -->
+        <line x1="340" y1="336" x2="340" y2="380" stroke="#000" stroke-width="1.5" marker-end="url(#arr1)"/>
+        <text x="352" y="362" fill="#000" font-size="11" font-family="Space Grotesk, sans-serif" font-weight="600">Start</text>
+
+        <!-- reset_game() -->
+        <rect x="200" y="380" width="280" height="48" rx="6" fill="#faeeda" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="398" text-anchor="middle" dominant-baseline="central" fill="#633806" font-size="13" font-weight="700" font-family="Space Grotesk, sans-serif">reset_game()</text>
+        <text x="340" y="416" text-anchor="middle" dominant-baseline="central" fill="#854f0b" font-size="11" font-family="Space Grotesk, sans-serif">lives=3, score=0, vymaž objekty</text>
+
+        <line x1="340" y1="428" x2="340" y2="464" stroke="#000" stroke-width="1.5" marker-end="url(#arr1)"/>
+
+        <!-- GAME stav -->
+        <rect x="200" y="464" width="280" height="48" rx="6" fill="#ff3366" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="484" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="14" font-weight="700" font-family="Space Grotesk, sans-serif">Stav = GAME</text>
+        <text x="340" y="502" text-anchor="middle" dominant-baseline="central" fill="#ffc0cf" font-size="11" font-family="Space Grotesk, sans-serif">pohyb · střelba · kolize · HUD</text>
+
+        <line x1="340" y1="512" x2="340" y2="548" stroke="#000" stroke-width="1.5" marker-end="url(#arr1)"/>
+
+        <!-- ESC Pauza diamond -->
+        <polygon points="340,548 420,574 340,600 260,574" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="570" text-anchor="middle" dominant-baseline="central" fill="#000" font-size="11" font-weight="700" font-family="Space Grotesk, sans-serif">ESC / PAUSE</text>
+        <text x="340" y="586" text-anchor="middle" dominant-baseline="central" fill="#555" font-size="10" font-family="Space Grotesk, sans-serif">klik na tlačítko?</text>
+
+        <!-- Pauza větev -->
+        <line x1="260" y1="574" x2="150" y2="574" stroke="#000" stroke-width="1.5" marker-end="url(#arr1)"/>
+        <text x="206" y="564" text-anchor="middle" fill="#000" font-size="11" font-weight="600" font-family="Space Grotesk, sans-serif">ANO</text>
+        <rect x="40" y="552" width="110" height="44" rx="6" fill="#eeedfe" stroke="#000" stroke-width="1.5"/>
+        <text x="95" y="570" text-anchor="middle" dominant-baseline="central" fill="#3c3489" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">PAUSE</text>
+        <text x="95" y="586" text-anchor="middle" dominant-baseline="central" fill="#534ab7" font-size="10" font-family="Space Grotesk, sans-serif">C=pokr. M=menu</text>
+        <!-- Pokračování šipka zpět do GAME -->
+        <path d="M 95 596 L 95 640 L 200 640" fill="none" stroke="#888" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#arr1)"/>
+        <text x="100" y="632" fill="#888" font-size="10" font-family="Space Grotesk, sans-serif">C (3,2,1...)</text>
+
+        <!-- Ne z Pauzy -->
+        <line x1="340" y1="600" x2="340" y2="640" stroke="#000" stroke-width="1.5" marker-end="url(#arr1)"/>
+        <text x="352" y="622" fill="#000" font-size="11" font-weight="600" font-family="Space Grotesk, sans-serif">NE</text>
+
+        <!-- lives<=0 nebo base_hp<=0 diamond -->
+        <rect x="200" y="640" width="280" height="48" rx="6" fill="#000" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="658" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">lives ≤ 0 nebo base_hp ≤ 0?</text>
+        <text x="340" y="676" text-anchor="middle" dominant-baseline="central" fill="#aaa" font-size="11" font-family="Space Grotesk, sans-serif">konec hry?</text>
+
+        <line x1="340" y1="688" x2="340" y2="724" stroke="#000" stroke-width="1.5" marker-end="url(#arr1)"/>
+
+        <!-- GAME OVER -->
+        <rect x="200" y="724" width="280" height="48" rx="6" fill="#e24b4a" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="742" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="14" font-weight="700" font-family="Space Grotesk, sans-serif">Stav = GAME_OVER</text>
+        <text x="340" y="760" text-anchor="middle" dominant-baseline="central" fill="#ffc0bf" font-size="11" font-family="Space Grotesk, sans-serif">zadat jméno · save_highscore()</text>
+
+        <!-- zpět do MENU šipka -->
+        <path d="M 480 748 L 620 748 L 620 208 L 480 208" fill="none" stroke="#888" stroke-width="1.2" stroke-dasharray="6 4" marker-end="url(#arr1)"/>
+        <text x="624" y="480" fill="#888" font-size="10" font-family="Space Grotesk, sans-serif" transform="rotate(90,624,480)">ENTER → zpět do MENU</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- DIAGRAM 2: Kolizní systém (Collision Detection)  -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="diagram-block">
+    <div class="diagram-head">
+      <div class="diagram-num">02</div>
+      <div class="diagram-title-wrap">
+        <div class="diagram-title">Kolizní systém</div>
+        <div class="diagram-subtitle">Collision Detection &amp; Skóre</div>
+      </div>
+    </div>
+    <div class="diagram-desc">
+      <div class="desc-item">
+        <div class="desc-label">Co zobrazuje</div>
+        <div class="desc-text">Jak hra každý snímek kontroluje, zda se střely, nepřátelé nebo meteority navzájem dotkly – a co se pak stane.</div>
+      </div>
+      <div class="desc-item">
+        <div class="desc-label">Proč je to důležité</div>
+        <div class="desc-text">Bez kolizí by střely procházely nepřáteli a meteority by byly neviditelné. Tato logika přiděluje body a odebírá životy.</div>
+      </div>
+      <div class="desc-item">
+        <div class="desc-label">Technické detaily</div>
+        <div class="desc-text">Nepřátelé používají Rect.colliderect(), meteority kruhovou kolizi přes math.hypot() – každý objekt má jiný tvar.</div>
+      </div>
+    </div>
+    <div class="diagram-svg-wrap">
+      <svg viewBox="0 0 680 740" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+
+        <!-- START každý snímek -->
+        <rect x="240" y="20" width="200" height="44" rx="22" fill="#000" stroke="#000"/>
+        <text x="340" y="42" text-anchor="middle" dominant-baseline="central" fill="#ffde00" font-size="13" font-weight="700" font-family="Space Grotesk, sans-serif">KAŽDÝ SNÍMEK (60 FPS)</text>
+
+        <line x1="340" y1="64" x2="340" y2="96" stroke="#000" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+        <!-- Střely hráče -->
+        <rect x="200" y="96" width="280" height="48" rx="6" fill="#faeeda" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="114" text-anchor="middle" dominant-baseline="central" fill="#633806" font-size="13" font-weight="700" font-family="Space Grotesk, sans-serif">Pohyb střel hráče</text>
+        <text x="340" y="132" text-anchor="middle" dominant-baseline="central" fill="#854f0b" font-size="11" font-family="Space Grotesk, sans-serif">každá střela b.y -= 8 (nahoru)</text>
+
+        <line x1="340" y1="144" x2="340" y2="180" stroke="#000" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+        <!-- Kolize střela x nepřítel -->
+        <polygon points="340,180 444,210 340,240 236,210" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="204" text-anchor="middle" dominant-baseline="central" fill="#000" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">b.colliderect(enemy)?</text>
+        <text x="340" y="220" text-anchor="middle" dominant-baseline="central" fill="#555" font-size="10" font-family="Space Grotesk, sans-serif">střela zasáhla nepřítele?</text>
+
+        <!-- ANO větev - vlevo -->
+        <line x1="236" y1="210" x2="100" y2="210" stroke="#000" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <text x="166" y="200" text-anchor="middle" fill="#000" font-size="11" font-weight="600" font-family="Space Grotesk, sans-serif">ANO</text>
+        <rect x="20" y="188" width="80" height="44" rx="6" fill="#e24b4a" stroke="#000" stroke-width="1.5"/>
+        <text x="60" y="204" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="11" font-weight="700" font-family="Space Grotesk, sans-serif">enemy.hp -= 1</text>
+        <text x="60" y="220" text-anchor="middle" dominant-baseline="central" fill="#ffc0bf" font-size="10" font-family="Space Grotesk, sans-serif">odstraň střelu</text>
+
+        <!-- hp<=0? -->
+        <line x1="60" y1="232" x2="60" y2="268" stroke="#000" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <polygon points="60,268 116,290 60,312 4,290" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <text x="60" y="286" text-anchor="middle" dominant-baseline="central" fill="#000" font-size="11" font-weight="700" font-family="Space Grotesk, sans-serif">hp ≤ 0?</text>
+        <text x="60" y="302" text-anchor="middle" dominant-baseline="central" fill="#555" font-size="10" font-family="Space Grotesk, sans-serif">mrtvý?</text>
+
+        <line x1="60" y1="312" x2="60" y2="348" stroke="#000" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <text x="72" y="332" fill="#000" font-size="11" font-weight="600" font-family="Space Grotesk, sans-serif">ANO</text>
+        <rect x="10" y="348" width="100" height="44" rx="6" fill="#639922" stroke="#000" stroke-width="1.5"/>
+        <text x="60" y="366" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">score += 15</text>
+        <text x="60" y="382" text-anchor="middle" dominant-baseline="central" fill="#c0dd97" font-size="10" font-family="Space Grotesk, sans-serif">odstraň nepřítele</text>
+
+        <!-- NE z kolize s nepritelem - dolů k meteoritu -->
+        <line x1="340" y1="240" x2="340" y2="276" stroke="#000" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <text x="352" y="260" fill="#000" font-size="11" font-weight="600" font-family="Space Grotesk, sans-serif">NE</text>
+
+        <!-- Kolize střela x meteorit -->
+        <polygon points="340,276 456,308 340,340 224,308" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="302" text-anchor="middle" dominant-baseline="central" fill="#000" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">hypot(b, meteor) &lt; radius?</text>
+        <text x="340" y="318" text-anchor="middle" dominant-baseline="central" fill="#555" font-size="10" font-family="Space Grotesk, sans-serif">kruhová kolize – zasáhl meteorit?</text>
+
+        <!-- ANO meteorit - vpravo -->
+        <line x1="456" y1="308" x2="560" y2="308" stroke="#000" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <text x="506" y="298" text-anchor="middle" fill="#000" font-size="11" font-weight="600" font-family="Space Grotesk, sans-serif">ANO</text>
+        <rect x="560" y="286" width="100" height="44" rx="6" fill="#ba7517" stroke="#000" stroke-width="1.5"/>
+        <text x="610" y="304" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">score += 5</text>
+        <text x="610" y="320" text-anchor="middle" dominant-baseline="central" fill="#fac775" font-size="10" font-family="Space Grotesk, sans-serif">odstraň střelu</text>
+
+        <!-- Rozštěpení meteoritu -->
+        <line x1="610" y1="330" x2="610" y2="366" stroke="#000" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <polygon points="610,366 660,390 610,414 560,390" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <text x="610" y="386" text-anchor="middle" dominant-baseline="central" fill="#000" font-size="11" font-weight="700" font-family="Space Grotesk, sans-serif">size &gt; 1?</text>
+        <text x="610" y="402" text-anchor="middle" dominant-baseline="central" fill="#555" font-size="10" font-family="Space Grotesk, sans-serif">velký meteorit?</text>
+
+        <line x1="610" y1="414" x2="610" y2="450" stroke="#000" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <text x="622" y="434" fill="#000" font-size="11" font-weight="600" font-family="Space Grotesk, sans-serif">ANO</text>
+        <rect x="548" y="450" width="124" height="44" rx="6" fill="#faeeda" stroke="#000" stroke-width="1.5"/>
+        <text x="610" y="468" text-anchor="middle" dominant-baseline="central" fill="#633806" font-size="11" font-weight="700" font-family="Space Grotesk, sans-serif">2× Meteor(size-1)</text>
+        <text x="610" y="484" text-anchor="middle" dominant-baseline="central" fill="#854f0b" font-size="10" font-family="Space Grotesk, sans-serif">spawn vx=±3</text>
+
+        <!-- NE z meteoritu - střely nepřátel -->
+        <line x1="340" y1="340" x2="340" y2="376" stroke="#000" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <text x="352" y="360" fill="#000" font-size="11" font-weight="600" font-family="Space Grotesk, sans-serif">NE</text>
+
+        <!-- Střely nepřátel -->
+        <rect x="200" y="376" width="280" height="48" rx="6" fill="#eeedfe" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="394" text-anchor="middle" dominant-baseline="central" fill="#3c3489" font-size="13" font-weight="700" font-family="Space Grotesk, sans-serif">Pohyb střel nepřátel</text>
+        <text x="340" y="412" text-anchor="middle" dominant-baseline="central" fill="#534ab7" font-size="11" font-family="Space Grotesk, sans-serif">každá střela b.y += 5 (dolů)</text>
+
+        <line x1="340" y1="424" x2="340" y2="460" stroke="#000" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+        <!-- kolize nepřítel x hráč -->
+        <polygon points="340,460 444,492 340,524 236,492" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="486" text-anchor="middle" dominant-baseline="central" fill="#000" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">b.colliderect(player)?</text>
+        <text x="340" y="502" text-anchor="middle" dominant-baseline="central" fill="#555" font-size="10" font-family="Space Grotesk, sans-serif">střela zasáhla hráče?</text>
+
+        <!-- ANO - vlevo -->
+        <line x1="236" y1="492" x2="130" y2="492" stroke="#000" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <text x="182" y="482" text-anchor="middle" fill="#000" font-size="11" font-weight="600" font-family="Space Grotesk, sans-serif">ANO</text>
+        <!-- štít? -->
+        <polygon points="80,492 130,514 80,536 30,514" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <text x="80" y="510" text-anchor="middle" dominant-baseline="central" fill="#000" font-size="11" font-weight="700" font-family="Space Grotesk, sans-serif">shield?</text>
+        <text x="80" y="526" text-anchor="middle" dominant-baseline="central" fill="#555" font-size="10" font-family="Space Grotesk, sans-serif">aktivní?</text>
+
+        <!-- NE ze štítu - lives-- -->
+        <line x1="80" y1="536" x2="80" y2="572" stroke="#000" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <text x="92" y="556" fill="#000" font-size="11" font-weight="600" font-family="Space Grotesk, sans-serif">NE</text>
+        <rect x="30" y="572" width="100" height="44" rx="6" fill="#e24b4a" stroke="#000" stroke-width="1.5"/>
+        <text x="80" y="592" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">lives -= 1</text>
+        <text x="80" y="608" text-anchor="middle" dominant-baseline="central" fill="#ffc0bf" font-size="10" font-family="Space Grotesk, sans-serif">ztráta života</text>
+
+        <!-- NE z hráče -->
+        <line x1="340" y1="524" x2="340" y2="560" stroke="#000" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <text x="352" y="544" fill="#000" font-size="11" font-weight="600" font-family="Space Grotesk, sans-serif">NE</text>
+
+        <!-- Konec snímku -->
+        <rect x="200" y="560" width="280" height="48" rx="6" fill="#000" stroke="#000"/>
+        <text x="340" y="578" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="13" font-weight="700" font-family="Space Grotesk, sans-serif">pygame.display.flip()</text>
+        <text x="340" y="596" text-anchor="middle" dominant-baseline="central" fill="#aaa" font-size="11" font-family="Space Grotesk, sans-serif">zobraz výsledný snímek</text>
+
+        <!-- Šipka zpět nahoru (smyčka) -->
+        <path d="M 480 584 L 660 584 L 660 42 L 480 42" fill="none" stroke="#888" stroke-width="1.2" stroke-dasharray="6 4" marker-end="url(#arr2)"/>
+        <text x="664" y="313" fill="#888" font-size="10" font-family="Space Grotesk, sans-serif" transform="rotate(90,664,313)">opakuj 60× za sekundu</text>
+
+        <!-- Legenda -->
+        <rect x="20" y="672" width="640" height="52" rx="6" fill="#f4f0ea" stroke="#000" stroke-width="1"/>
+        <text x="340" y="694" text-anchor="middle" dominant-baseline="central" fill="#000" font-size="11" font-weight="700" font-family="Space Grotesk, sans-serif">LEGENDA KOLIZÍ:</text>
+        <rect x="30" y="706" width="12" height="12" fill="#e24b4a"/>
+        <text x="48" y="716" fill="#000" font-size="10" font-family="Space Grotesk, sans-serif">lives -= 1</text>
+        <rect x="140" y="706" width="12" height="12" fill="#639922"/>
+        <text x="158" y="716" fill="#000" font-size="10" font-family="Space Grotesk, sans-serif">score += 15 (nepřítel)</text>
+        <rect x="310" y="706" width="12" height="12" fill="#ba7517"/>
+        <text x="328" y="716" fill="#000" font-size="10" font-family="Space Grotesk, sans-serif">score += 5 (meteorit)</text>
+        <rect x="480" y="706" width="12" height="12" fill="#1d9e75"/>
+        <text x="498" y="716" fill="#000" font-size="10" font-family="Space Grotesk, sans-serif">štít = ochrana</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- DIAGRAM 3: Systém powerupů (Collectibles)        -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="diagram-block">
+    <div class="diagram-head">
+      <div class="diagram-num">03</div>
+      <div class="diagram-title-wrap">
+        <div class="diagram-title">Systém powerupů</div>
+        <div class="diagram-subtitle">Collectibles &amp; Efekty</div>
+      </div>
+    </div>
+    <div class="diagram-desc">
+      <div class="desc-item">
+        <div class="desc-label">Co zobrazuje</div>
+        <div class="desc-text">Jak hra spawnuje padající bonusy, co se stane, když je hráč sebere, a jak dlouho každý efekt trvá.</div>
+      </div>
+      <div class="desc-item">
+        <div class="desc-label">Typy powerupů</div>
+        <div class="desc-text">Autoshoot (10s), Shield (15s), Heart (+1 život), Wrench (+2 HP základny). Každý má jinou pravděpodobnost spawnu.</div>
+      </div>
+      <div class="desc-item">
+        <div class="desc-label">Spawn mechanika</div>
+        <div class="desc-text">Každých ~8 sekund s 75% šancí se spawne nový powerup. Váhy určují druh: 30% auto, 20% štít, 30% srdce, 20% klíč.</div>
+      </div>
+    </div>
+    <div class="diagram-svg-wrap">
+      <svg viewBox="0 0 680 760" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+
+        <!-- START -->
+        <rect x="240" y="20" width="200" height="44" rx="22" fill="#000" stroke="#000"/>
+        <text x="340" y="42" text-anchor="middle" dominant-baseline="central" fill="#ffde00" font-size="13" font-weight="700" font-family="Space Grotesk, sans-serif">HRA BĚŽÍ (stav=GAME)</text>
+
+        <line x1="340" y1="64" x2="340" y2="100" stroke="#000" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+        <!-- Timer -->
+        <rect x="190" y="100" width="300" height="48" rx="6" fill="#eeedfe" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="118" text-anchor="middle" dominant-baseline="central" fill="#3c3489" font-size="13" font-weight="700" font-family="Space Grotesk, sans-serif">collectible_timer += dt</text>
+        <text x="340" y="136" text-anchor="middle" dominant-baseline="central" fill="#534ab7" font-size="11" font-family="Space Grotesk, sans-serif">čítač se zvyšuje každý snímek</text>
+
+        <line x1="340" y1="148" x2="340" y2="184" stroke="#000" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+        <!-- Timer >= 8000? -->
+        <polygon points="340,184 436,216 340,248 244,216" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="210" text-anchor="middle" dominant-baseline="central" fill="#000" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">timer ≥ 8000 ms?</text>
+        <text x="340" y="226" text-anchor="middle" dominant-baseline="central" fill="#555" font-size="10" font-family="Space Grotesk, sans-serif">uběhlo 8 sekund?</text>
+
+        <!-- NE - zpět do čítače -->
+        <path d="M 244 216 L 140 216 L 140 124 L 190 124" fill="none" stroke="#888" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#arr3)"/>
+        <text x="142" y="170" fill="#888" font-size="10" font-family="Space Grotesk, sans-serif">NE</text>
+
+        <!-- ANO - reset + náhoda -->
+        <line x1="340" y1="248" x2="340" y2="284" stroke="#000" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <text x="352" y="268" fill="#000" font-size="11" font-weight="600" font-family="Space Grotesk, sans-serif">ANO</text>
+
+        <!-- Reset timer + random check -->
+        <rect x="200" y="284" width="280" height="48" rx="6" fill="#faeeda" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="302" text-anchor="middle" dominant-baseline="central" fill="#633806" font-size="13" font-weight="700" font-family="Space Grotesk, sans-serif">timer = 0</text>
+        <text x="340" y="320" text-anchor="middle" dominant-baseline="central" fill="#854f0b" font-size="11" font-family="Space Grotesk, sans-serif">random.random() &lt; 0.75?</text>
+
+        <line x1="340" y1="332" x2="340" y2="368" stroke="#000" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+        <!-- spawn_collectible() -->
+        <polygon points="340,368 424,398 340,428 256,398" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="392" text-anchor="middle" dominant-baseline="central" fill="#000" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">spawn_collectible()</text>
+        <text x="340" y="408" text-anchor="middle" dominant-baseline="central" fill="#555" font-size="10" font-family="Space Grotesk, sans-serif">výběr druhu dle vah</text>
+
+        <!-- 4 větve powerupů -->
+        <!-- Autoshoot - vlevo nahoře -->
+        <line x1="256" y1="398" x2="80" y2="310" stroke="#000" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <text x="150" y="345" fill="#000" font-size="10" font-weight="600" font-family="Space Grotesk, sans-serif">30%</text>
+        <rect x="20" y="286" width="100" height="44" rx="6" fill="#ef9f27" stroke="#000" stroke-width="1.5"/>
+        <text x="70" y="304" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">⚡ AUTO</text>
+        <text x="70" y="320" text-anchor="middle" dominant-baseline="central" fill="#faeeda" font-size="10" font-family="Space Grotesk, sans-serif">autoshoot</text>
+
+        <!-- Shield - vlevo dole -->
+        <line x1="256" y1="398" x2="80" y2="460" stroke="#000" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <text x="142" y="455" fill="#000" font-size="10" font-weight="600" font-family="Space Grotesk, sans-serif">20%</text>
+        <rect x="20" y="436" width="100" height="44" rx="6" fill="#1d9e75" stroke="#000" stroke-width="1.5"/>
+        <text x="70" y="454" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">🛡 ŠTÍT</text>
+        <text x="70" y="470" text-anchor="middle" dominant-baseline="central" fill="#e1f5ee" font-size="10" font-family="Space Grotesk, sans-serif">shield</text>
+
+        <!-- Heart - vpravo nahoře -->
+        <line x1="424" y1="398" x2="580" y2="310" stroke="#000" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <text x="495" y="345" fill="#000" font-size="10" font-weight="600" font-family="Space Grotesk, sans-serif">30%</text>
+        <rect x="530" y="286" width="100" height="44" rx="6" fill="#e24b4a" stroke="#000" stroke-width="1.5"/>
+        <text x="580" y="304" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">♥ ŽIVOT</text>
+        <text x="580" y="320" text-anchor="middle" dominant-baseline="central" fill="#ffc0bf" font-size="10" font-family="Space Grotesk, sans-serif">heart</text>
+
+        <!-- Wrench - vpravo dole -->
+        <line x1="424" y1="398" x2="580" y2="460" stroke="#000" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <text x="498" y="455" fill="#000" font-size="10" font-weight="600" font-family="Space Grotesk, sans-serif">20%</text>
+        <rect x="530" y="436" width="100" height="44" rx="6" fill="#ba7517" stroke="#000" stroke-width="1.5"/>
+        <text x="580" y="454" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">🔧 BASE</text>
+        <text x="580" y="470" text-anchor="middle" dominant-baseline="central" fill="#fac775" font-size="10" font-family="Space Grotesk, sans-serif">wrench</text>
+
+        <!-- Všechny 4 větve se sbíhají dolů do padání -->
+        <line x1="70" y1="480" x2="70" y2="540" stroke="#000" stroke-width="1.2"/>
+        <line x1="580" y1="480" x2="580" y2="540" stroke="#000" stroke-width="1.2"/>
+        <line x1="70" y1="540" x2="580" y2="540" stroke="#000" stroke-width="1.2"/>
+        <line x1="340" y1="540" x2="340" y2="568" stroke="#000" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+        <!-- Padání -->
+        <rect x="200" y="568" width="280" height="48" rx="6" fill="#000" stroke="#000"/>
+        <text x="340" y="586" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="13" font-weight="700" font-family="Space Grotesk, sans-serif">Collectible.move()</text>
+        <text x="340" y="604" text-anchor="middle" dominant-baseline="central" fill="#aaa" font-size="11" font-family="Space Grotesk, sans-serif">rect.y += 2.5 (padání dolů)</text>
+
+        <line x1="340" y1="616" x2="340" y2="652" stroke="#000" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+        <!-- Kolize s hráčem? -->
+        <polygon points="340,652 444,684 340,716 236,684" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <text x="340" y="678" text-anchor="middle" dominant-baseline="central" fill="#000" font-size="12" font-weight="700" font-family="Space Grotesk, sans-serif">colliderect(player)?</text>
+        <text x="340" y="694" text-anchor="middle" dominant-baseline="central" fill="#555" font-size="10" font-family="Space Grotesk, sans-serif">hráč sebral powerup?</text>
+
+        <!-- ANO - efekt -->
+        <line x1="444" y1="684" x2="580" y2="684" stroke="#000" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <text x="510" y="674" text-anchor="middle" fill="#000" font-size="11" font-weight="600" font-family="Space Grotesk, sans-serif">ANO</text>
+        <rect x="580" y="662" width="80" height="44" rx="6" fill="#ff3366" stroke="#000" stroke-width="1.5"/>
+        <text x="620" y="680" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="11" font-weight="700" font-family="Space Grotesk, sans-serif">APLIKUJ</text>
+        <text x="620" y="696" text-anchor="middle" dominant-baseline="central" fill="#ffc0cf" font-size="10" font-family="Space Grotesk, sans-serif">efekt!</text>
+
+        <!-- NE - spadl dole? -->
+        <line x1="340" y1="716" x2="340" y2="740" stroke="#000" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <text x="352" y="730" fill="#000" font-size="11" font-weight="600" font-family="Space Grotesk, sans-serif">NE</text>
+        <rect x="240" y="740" width="200" height="14" rx="4" fill="#888" stroke="#000" stroke-width="1"/>
+        <text x="340" y="749" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="9" font-family="Space Grotesk, sans-serif">rect.bottom > HEIGHT → smaž</text>
+
+        <!-- Efekty popis vpravo -->
+        <rect x="20" y="570" width="170" height="90" rx="6" fill="#f4f0ea" stroke="#000" stroke-width="1.5"/>
+        <text x="105" y="590" text-anchor="middle" dominant-baseline="central" fill="#000" font-size="11" font-weight="700" font-family="Space Grotesk, sans-serif">EFEKTY:</text>
+        <text x="30" y="610" fill="#ef9f27" font-size="10" font-weight="700" font-family="Space Grotesk, sans-serif">⚡ auto_shoot_active = True (10s)</text>
+        <text x="30" y="628" fill="#1d9e75" font-size="10" font-weight="700" font-family="Space Grotesk, sans-serif">🛡 shield_active = True (15s)</text>
+        <text x="30" y="646" fill="#e24b4a" font-size="10" font-weight="700" font-family="Space Grotesk, sans-serif">♥ lives += 1</text>
+        <text x="30" y="664" fill="#ba7517" font-size="10" font-weight="700" font-family="Space Grotesk, sans-serif">🔧 base_hp = min(hp+2, 10)</text>
+      </svg>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  function logout() { localStorage.removeItem('si_session'); location.reload(); }
+
+  function initNav() {
+    const session = localStorage.getItem('si_session');
+    if (!session) return;
+    const users = JSON.parse(localStorage.getItem('si_users') || '{}');
+    if (!users[session]) return;
+    document.getElementById('navUser').style.display = 'flex';
+    document.getElementById('navName').textContent   = session;
+    document.getElementById('nlLogin').style.display    = 'none';
+    document.getElementById('nlRegister').style.display = 'none';
+  }
+
+  initNav();
+</script>
+</body>
+</html>

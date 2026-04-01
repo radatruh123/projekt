@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<!-- DOCTYPE deklarace říká prohlížeči, že jde o moderní HTML5 -->
+<html lang="cs">
+
+<head>
+  <meta charset="UTF-8">
+  <!-- UTF-8 = kódování podporující české znaky (háčky, čárky…) -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Mobilní zobrazení: šířka stránky = šířka obrazovky, bez zvětšení -->
+
+  <title>Space Invaders – Registrace</title>
+
+  <style>
+    /* ============================================================
+       CSS styly pro registrační stránku
+       Layout je opačný než Login:
+         - Vlevo  = formulář
+         - Vpravo = barevný blok s nápisem "Nový Hráč."
+       ============================================================ */
+
+    /* Google Fonts – vlastní fonty z internetu */
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;600;700&display=swap');
+
+    /* ── CSS proměnné – centralizované barvy a stíny ────────────
+       Stačí změnit hodnotu zde a změní se všude na stránce. */
+    :root {
+      --bg:        #fff;
+      --text:      #000;
+      --primary:   #ff3366;            /* Červeno-růžová – akcentová barva */
+      --accent:    #ffde00;            /* Žlutá – hover a focus efekty */
+      --secondary: #00c4b5;           /* Tyrkysová – pravý panel */
+      --border:    4px solid #000;    /* Silný černý rámeček */
+      --shadow:    8px 8px 0px #000;  /* Tvrdý stín = pixel-art styl */
+      --font-head: 'Bebas Neue', sans-serif;
+      --font-body: 'Space Grotesk', sans-serif;
+    }
+
+    /* Reset výchozích prohlížečových stylů (margin, padding, box model) */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── CELÁ STRÁNKA ───────────────────────────────────────────
+       display: flex = levá a pravá strana vedle sebe
+       Na mobilu se změní na flex-direction: column-reverse
+       (pravý dekorativní panel půjde NAD formulář) */
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── LEVÁ POLOVINA – formulář ───────────────────────────────
+       flex: 1 = zabírá 50% prostoru (stejně jako pravá polovina)
+       position: relative = potřeba pro absolutní prvky uvnitř */
+    .split-left {
+      flex: 1;
+      background: var(--bg);  /* Bílé pozadí – čisté pro formulář */
+      display: flex;
+      flex-direction: column;
+      padding: 2rem;
+      position: relative;
+    }
+
+    /* ── PRAVÁ POLOVINA – dekorativní ──────────────────────────
+       Obrácená verze .split-left z login.html:
+       text-align: right = obsah zarovnán vpravo */
+    .split-right {
+      flex: 1;
+      background: var(--secondary);   /* Tyrkysové pozadí */
+      border-left: var(--border);     /* Silná dělicí čára na levé straně */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 4rem;
+      position: relative;
+      overflow: hidden;               /* bg-text nepřeteče přes panel */
+      text-align: right;
+    }
+
+    /* Velký nápis "Nový Hráč." */
+    .split-right h1 {
+      font-family: var(--font-head);
+      font-size: clamp(5rem, 8vw, 10rem);
+      /* clamp = responzivní velikost: min 5rem, cíl 8vw (8% šířky okna), max 10rem */
+      line-height: 0.8;
+      color: #000;
+      text-transform: uppercase;
+      z-index: 2;
+    }
+
+    /* Obrovský průhledný text "NEW" v pozadí (dekorativní)
+       pointer-events: none = kliknutí "propadne skrz" tento prvek */
+    .split-right .bg-text {
+      position: absolute;
+      font-family: var(--font-head);
+      font-size: 30vw;
+      color: rgba(0, 0, 0, 0.1);
+      transform: rotate(10deg);   /* Mírné otočení pro dynamiku */
+      top: -10%;
+      right: -10%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ── HORNÍ NAVIGACE ─────────────────────────────────────────
+       Zarovnána vlevo (narozdíl od login.html kde je vpravo) */
+    .top-nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: auto;  /* Odtlačí formulář dolů na střed */
+    }
+
+    .top-nav a {
+      font-family: var(--font-head);
+      font-size: 1.5rem;
+      text-decoration: none;
+      color: #000;
+      border: 2px solid #000;
+      padding: 0.5rem 1rem;
+      transition: 0.1s;
+      text-transform: uppercase;
+    }
+
+    .top-nav a:hover {
+      background: var(--accent);
+      transform: translate(-2px, -2px);  /* Efekt "stisknutého" tlačítka */
+      box-shadow: 4px 4px 0px #000;
+    }
+
+    /* ── FORMULÁŘOVÝ BOX ────────────────────────────────────────
+       margin: auto = centrování uvnitř flex containeru */
+    .form-box {
+      width: 100%;
+      max-width: 450px;
+      margin: auto;
+    }
+
+    .form-box h2 {
+      font-family: var(--font-head);
+      font-size: 4rem;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    /* Podtitulek s barevnou čarou vlevo – lišový od login.html (secondary místo primary) */
+    .form-box p {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      border-left: 4px solid var(--secondary);
+      padding-left: 1rem;
+    }
+
+    /* ── SKUPINY FORMULÁŘOVÝCH POLÍ ─────────────────────────────
+       .fg = "form group" – každá skupina = label + input */
+    .fg { margin-bottom: 1.2rem; }
+
+    .fg label {
+      display: block;
+      font-family: var(--font-head);
+      font-size: 1.5rem;
+      margin-bottom: 0.3rem;
+      text-transform: uppercase;
+    }
+
+    .fg input {
+      width: 100%;
+      padding: 0.8rem;
+      border: var(--border);
+      background: #f9f9f9;
+      font-family: var(--font-body);
+      font-size: 1.1rem;
+      font-weight: 600;
+      outline: none;     /* Odstraní výchozí prohlížečový focus rámeček */
+      transition: 0.1s;
+    }
+
+    /* Focus styl – červený stín místo žlutého (jako u login) */
+    .fg input:focus {
+      background: #fff;
+      box-shadow: 4px 4px 0px var(--primary);
+      transform: translate(-2px, -2px);
+    }
+
+    /* ── CSS třídy pro validaci inputu ──────────────────────────
+       .bad = chybný vstup (červený okraj)
+       .ok  = správný vstup (tyrkysový okraj)
+       JavaScript je přidává/odebírá za běhu při psaní */
+    .fg input.bad { border-color: red; }
+    .fg input.ok  { border-color: #00c4b5; }
+
+    /* ── UKAZATEL SÍLY HESLA ────────────────────────────────────
+       Pruh pod políčkem hesla, který vizuálně ukáže jak silné heslo je */
+    .strength-bar {
+      height: 8px;
+      border: 2px solid #000;
+      background: #fff;
+      margin-top: 0.5rem;
+    }
+
+    /* Výplň pruhu – JavaScript nastaví šířku a barvu dynamicky */
+    .strength-fill {
+      height: 100%;
+      width: 0;           /* Začíná prázdný */
+      background: var(--text);
+      transition: 0.2s;   /* Plynulá animace při změně */
+    }
+
+    /* ── ZPRÁVY (chyba / úspěch) ────────────────────────────────
+       display: none = schované; třída "show" je zobrazí */
+    .alert {
+      padding: 1rem;
+      border: var(--border);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: none;
+      box-shadow: 4px 4px 0px #000;
+    }
+    .alert.error   { background: var(--primary); color: #fff; }
+    .alert.success { background: var(--accent);  color: #000; }
+    .alert.show    { display: block; }
+
+    /* ── TLAČÍTKO PRO ODESLÁNÍ FORMULÁŘE ────────────────────────
+       Černé pozadí (narozdíl od žlutého v login.html) */
+    .btn-full {
+      width: 100%;
+      padding: 1.2rem;
+      font-family: var(--font-head);
+      font-size: 2rem;
+      border: var(--border);
+      cursor: pointer;
+      background: var(--text);  /* Černé pozadí */
+      color: #fff;
+      transition: 0.1s;
+      text-transform: uppercase;
+      margin-top: 1rem;
+    }
+
+    .btn-full:hover {
+      background: var(--primary);  /* Při hoveru zčervená */
+      transform: translate(-4px, -4px);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-full:disabled {
+      opacity: 0.5;
+      pointer-events: none;  /* Deaktivuje všechny myší interakce */
+    }
+
+    /* ── RESPONZIVITA ───────────────────────────────────────────
+       Na mobilu: pořadí otočeno (flex-direction: column-reverse)
+       → dekorativní pravý panel bude NAHOŘE, formulář DOLE */
+    @media(max-width: 900px) {
+      body { flex-direction: column-reverse; }
+      .split-right {
+        padding: 2rem;
+        border-left: none;
+        border-bottom: var(--border);
+        flex: none;
+        height: 30vh;
+        text-align: left;   /* Na mobilu zarovnat vlevo */
+      }
+      .split-right h1 { font-size: 4rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ── LEVÁ POLOVINA – registrační formulář ───────────────────────
+     Obsahuje navigační tlačítka nahoře a samotný formulář uprostřed -->
+<div class="split-left">
+
+  <!-- Navigace v levém horním rohu -->
+  <div class="top-nav">
+    <a href="index.html">Zpět</a>
+    <!-- inline style přebíjí třídové styly pro toto konkrétní tlačítko -->
+    <a href="login.html" style="background:var(--primary); color:#fff;">Login</a>
+  </div>
+
+  <!-- Formulářový box -->
+  <div class="form-box">
+    <h2>Registrace</h2>
+    <p>Vytvoř si profil a zapiš se do žebříčku.</p>
+
+    <!-- Chybová zpráva (červená) – zobrazí JS funkce showErr() -->
+    <div class="alert error"   id="err"></div>
+    <!-- Úspěšná zpráva (žlutá) – zobrazí JS funkce showOk() -->
+    <div class="alert success" id="ok"></div>
+
+    <!-- Pole: přezdívka
+         oninput = JavaScript funkce valUser() se zavolá při každém stisku klávesy -->
+    <div class="fg">
+      <label>Přezdívka (2-20 znaků)</label>
+      <input type="text"
+             id="username"
+             maxlength="20"
+             autocomplete="username"
+             oninput="valUser(this)">
+      <!-- maxlength="20" = prohlížeč nedovolí napsat více než 20 znaků -->
+    </div>
+
+    <!-- Pole: heslo
+         oninput volá checkStrength() – aktualizuje ukazatel síly hesla při psaní -->
+    <div class="fg">
+      <label>Heslo (Min 4 znaky)</label>
+      <input type="password"
+             id="password"
+             autocomplete="new-password"
+             oninput="checkStrength(this.value)">
+      <!-- Ukazatel síly hesla: prázdný pruh, který JS plní -->
+      <div class="strength-bar">
+        <div class="strength-fill" id="sfill"></div>
+      </div>
+    </div>
+
+    <!-- Pole: heslo znovu (potvrzení)
+         oninput volá valMatch() – zkontroluje shodu obou hesel -->
+    <div class="fg">
+      <label>Heslo znovu</label>
+      <input type="password"
+             id="password2"
+             autocomplete="new-password"
+             oninput="valMatch()">
+    </div>
+
+    <!-- Odesílací tlačítko – onclick zavolá doRegister() -->
+    <button class="btn-full" id="btn" onclick="doRegister()">Vytvořit účet</button>
+  </div>
+
+</div>
+
+<!-- ── PRAVÁ POLOVINA – dekorativní ──────────────────────────────
+     Jen velký nápis a ozdobný text v pozadí. Žádná logika. -->
+<div class="split-right">
+  <!-- Obrovský průhledný nápis v pozadí -->
+  <div class="bg-text">NEW</div>
+  <!-- Hlavní nadpis -->
+  <h1>Nový<br>Hráč.</h1>
+</div>
+
+<!-- ── JAVASCRIPT ────────────────────────────────────────────────── -->
+<script>
+
+  /* Pokud je uživatel již přihlášen, rovnou ho přesměrujeme na hlavní stránku.
+     Registrace nepotřebuje přihlášený uživatel. */
+  if (localStorage.getItem('si_session')) location.href = 'index.html';
+
+  /* Enter kdekoliv ve formuláři = pokus o registraci */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') doRegister();
+  });
+
+  /* ── Validace přezdívky ───────────────────────────────────────── */
+
+  /**
+   * Kontroluje délku přezdívky a vizuálně označí input.
+   * Přidá CSS třídu 'ok' (zelená) nebo 'bad' (červená) na input element.
+   * @param {HTMLInputElement} input – odkaz na input element
+   */
+  function valUser(input) {
+    const v = input.value.trim();  // .trim() odstraní mezery na okrajích
+    // Ternární výraz: podmínka ? hodnota_při_true : hodnota_při_false
+    input.className = v.length >= 2 && v.length <= 20
+      ? 'ok'                // Délka OK → zelený okraj
+      : v.length ? 'bad'   // Něco je napsáno ale špatná délka → červený
+      : '';                  // Pole je prázdné → žádná třída
+  }
+
+  /* ── Ukazatel síly hesla ──────────────────────────────────────── */
+
+  /**
+   * Spočítá "sílu" hesla a zobrazí ji jako barevný pruh.
+   * Každé kritérium přidá 1 bod (celkem max 5 bodů = 100% pruh).
+   *
+   * Kritéria:
+   *   +1 = aspoň 4 znaky
+   *   +1 = aspoň 8 znaků
+   *   +1 = obsahuje velké písmeno (A-Z)
+   *   +1 = obsahuje číslici (0-9)
+   *   +1 = obsahuje speciální znak (!@#…)
+   *
+   * @param {string} pw – heslo pro vyhodnocení
+   */
+  function checkStrength(pw) {
+    const fill = document.getElementById('sfill');  // Prvek s pruhem
+    let s = 0;  // Skóre síly (0 = slabé, 5 = silné)
+
+    if (pw.length >= 4)           s++;  // Základní délka
+    if (pw.length >= 8)           s++;  // Dobrá délka
+    if (/[A-Z]/.test(pw))         s++;  // Velké písmeno (regex test)
+    if (/[0-9]/.test(pw))         s++;  // Číslice
+    if (/[^a-zA-Z0-9]/.test(pw)) s++;  // Speciální znak ([^ = cokoli kromě…])
+
+    // Šířka pruhu odpovídá skóre: 0→0%, 1→20%, 2→40%… 5→100%
+    fill.style.width      = ['0', '20%', '40%', '60%', '80%', '100%'][s];
+    // Barva pruhu: červená → žlutá → tyrkysová → černá (silné)
+    fill.style.background = ['#fff', '#ff3366', '#ffde00', '#00c4b5', '#000', '#000'][s];
+  }
+
+  /* ── Validace shody hesel ─────────────────────────────────────── */
+
+  /**
+   * Zkontroluje, zda obě hesla jsou stejná, a vizuálně označí druhý input.
+   * Volá se při psaní do pole "Heslo znovu" (oninput).
+   */
+  function valMatch() {
+    const p2 = document.getElementById('password2');   // Druhé heslo
+    const p1 = document.getElementById('password').value;  // První heslo
+    // Pokud je druhé heslo vyplněné, porovnáme. Jinak žádná třída.
+    p2.className = p2.value
+      ? (p2.value === p1 ? 'ok' : 'bad')
+      : '';
+  }
+
+  /* ── Zobrazení zpráv ──────────────────────────────────────────── */
+
+  /** Zobrazí červenou chybovou zprávu. */
+  function showErr(msg) {
+    const e = document.getElementById('err');
+    e.textContent = 'ERR: ' + msg;
+    e.classList.add('show');
+    document.getElementById('ok').classList.remove('show');
+  }
+
+  /** Zobrazí žlutou úspěšnou zprávu. */
+  function showOk(msg) {
+    const e = document.getElementById('ok');
+    e.textContent = 'OK: ' + msg;
+    e.classList.add('show');
+    document.getElementById('err').classList.remove('show');
+  }
+
+  /* ── Hashování hesla ──────────────────────────────────────────── */
+
+  /**
+   * Jednoduchá hashovací funkce (djb2 algoritmus).
+   * Ukládáme HASH hesla, ne heslo samotné – bezpečnější.
+   * Z hashe nelze zpětně dostat původní heslo.
+   *
+   * POZOR: Pro školní projekt dostačující.
+   * V produkci (reálný web) používej bcrypt nebo Argon2 na serveru!
+   *
+   * @param {string} str – heslo v prostém textu
+   * @returns {string} – hash (textový řetězec)
+   */
+  function simpleHash(str) {
+    let h = 5381;
+    for (let i = 0; i < str.length; i++) {
+      h = ((h << 5) + h) ^ str.charCodeAt(i);
+    }
+    return (h >>> 0).toString(36);
+  }
+
+  /* ── Registrace ───────────────────────────────────────────────── */
+
+  /**
+   * Hlavní funkce pro registraci nového uživatele.
+   *
+   * Postup:
+   *   1. Načte hodnoty z formuláře
+   *   2. Zkontroluje validitu (délky, shodu hesel)
+   *   3. Deaktivuje tlačítko (zabrání dvojitému odeslání)
+   *   4. Zkontroluje, zda jméno není obsazené
+   *   5. Uloží uživatele do localStorage a přihlásí ho
+   *   6. Přesměruje na hlavní stránku
+   */
+  function doRegister() {
+    const btn   = document.getElementById('btn');
+    const user  = document.getElementById('username').value.trim();
+    const pass  = document.getElementById('password').value;
+    const pass2 = document.getElementById('password2').value;
+
+    /* ── Validace vstupů ─────────────────────────────────────── */
+    if (!user || !pass) {
+      showErr('Musíš vyplnit všechno.');
+      return;
+    }
+    if (user.length < 2 || user.length > 20) {
+      showErr('Jméno musí mít 2-20 znaků.');
+      return;
+    }
+    if (pass.length < 4) {
+      showErr('Heslo je moc krátké.');
+      return;
+    }
+    if (pass !== pass2) {
+      showErr('Hesla se neshodují.');
+      return;
+    }
+
+    /* Deaktivujeme tlačítko – uživatel ví, že se něco zpracovává */
+    btn.disabled    = true;
+    btn.textContent = 'ZAPISUJI...';
+
+    /* setTimeout 400ms – krátká prodleva pro UX zpětnou vazbu */
+    setTimeout(() => {
+
+      /* Načteme existující uživatele z localStorage.
+         'si_users' = JSON objekt ve tvaru { "jméno": { password, created } }
+         || '{}' = výchozí prázdný objekt pokud klíč neexistuje */
+      const users = JSON.parse(localStorage.getItem('si_users') || '{}');
+
+      /* Zkontrolujeme, zda jméno není již obsazeno */
+      if (users[user]) {
+        showErr('Jméno už někdo má.');
+        btn.disabled    = false;
+        btn.textContent = 'VYTVOŘIT ÚČET';
+        return;
+      }
+
+      /* Uložíme nového uživatele:
+         - password: hash hesla (nikdy ukládáme plain text!)
+         - created: datum a čas registrace */
+      users[user] = {
+        password: simpleHash(pass),
+        created:  new Date().toLocaleString('cs-CZ')
+      };
+
+      /* Zapíšeme aktualizovaný seznam uživatelů zpět do localStorage.
+         JSON.stringify() = převede JavaScript objekt na JSON řetězec */
+      localStorage.setItem('si_users', JSON.stringify(users));
+
+      /* Automaticky přihlásíme nově registrovaného uživatele */
+      localStorage.setItem('si_session', user);
+
+      showOk('Hotovo. Jde se na to...');
+
+      /* Po 900ms přesměrujeme na hlavní stránku */
+      setTimeout(() => location.href = 'index.html', 900);
+
+    }, 400);
+  }
+
+</script>
+
+</body>
+</html>
